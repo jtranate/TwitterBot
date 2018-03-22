@@ -1,6 +1,8 @@
 
 # API Key Information
+API = {
 
+}
 
 SEARCH = {
     'CRITERIA' : ['retweet to win', 'rt to win'],
@@ -14,3 +16,7 @@ CONTEST_RULES = {
     'FAVORITE' : {'Fav', 'favorite', 'FAVORITE', 'Favorite', 'favourite', 'FAVOURITE', 'Favourite'},
     'COMMENT' : {'comment', 'COMMENT', 'Comment'},
 }
+
+
+# names in username to ignore
+IGNORE_USERS = ['bot', 'lvbroadcasting']

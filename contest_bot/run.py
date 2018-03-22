@@ -1,9 +1,11 @@
 import settings, twython
 
+IGNORE_USERS = settings.IGNORE_USERS
+global ignore_users
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
-    print "Connecting to Twitter API..."
+    print( "Connecting to Twitter API...")
     return twython.Twython(
                     api['CONSUMER_KEY'],
                     api['CONSUMER_SECRET'],
@@ -14,8 +16,9 @@ def get_twython_instance(api):
 def is_bot(username):
     """ Determine if the post was made by a bot """
     username = username.replace("0", 'o').lower()
-    if 'bot' in username:
-        return True
+    for user in IGNORE_USERS:
+        if user in username:
+            return True
 
     return False
 
@@ -31,14 +34,16 @@ def search(twitter, criteria, filters, num_posts, res_type):
 
     https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
     """
-    print "Searching for '" + criteria + "'"
-    print "\tFilters: " + filters
-    print "\tNumber of posts: " + `num_posts`
-    print "\tResult Type: " + res_type
+    print( "Searching for '" + criteria + "'")
+    print( "\tFilters: " + filters)
+    print( "\tNumber of posts: " + str(num_posts))
+    print( "\tResult Type: " + res_type)
     return twitter.search(q=criteria + ' ' + filters, count=num_posts, result_type=res_type, lang='en') #change to recent
 
 
 def enter_contest(twitter, tweets, contest_rules):
+    """ Enter a contest
+    """
     COMMENT_POST = lambda x: "@" + x + " I want to Win!"
 
     for data in tweets:
@@ -55,10 +60,10 @@ def enter_contest(twitter, tweets, contest_rules):
                 if word in data['text'].replace('#', '').split(' '):
                     # Retweet to enter
                     twitter.retweet(id=post_id_str)
-                    print "Retweeted post "
-                    print "\tPost ID: " + post_id_str
-                    print "\tUsername: " + user_id_str
-                    print "\tTweet: " + data['text'].replace("\n", '')
+                    print( "Retweeted post ")
+                    print( "\tPost ID: " + post_id_str)
+                    print( "\tUsername: " + user_id_str)
+                    print( "\tTweet: " + data['text'].replace("\n", ''))
                     retweeted = True
                     break
 
@@ -71,7 +76,7 @@ def enter_contest(twitter, tweets, contest_rules):
         followed = favorited = commented = False
         for word in data['text'].split(' '):
             if word in contest_rules['FOLLOW']:
-                twitter.create_friendship(screen_name=user_screen_name)
+                twitter.create_friendship(screen_name=user_screen_name, follow=True)
                 followed = True
             if word in contest_rules['FAVORITE']:
                 twitter.create_favorite(id=post_id_str)
@@ -80,9 +85,9 @@ def enter_contest(twitter, tweets, contest_rules):
                 twitter.update_status(status=COMMENT_POST(user_screen_name), in_reply_to_status_id=post_id)
                 commented = True
 
-        print "\tFollowed: " + `followed`
-        print "\tFavorited: " + `favorited`
-        print "\tCommented: " + `commented`
+        print( "\tFollowed: " + str(followed))
+        print( "\tFavorited: " + str(favorited))
+        print( "\tCommented: " + str(commented))
 
 if __name__ == '__main__':
     twitter = get_twython_instance(settings.API)
