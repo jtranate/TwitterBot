@@ -1,33 +1,26 @@
 
-import sqlite3, os
+import sqlite3
+
+import bot_settings as settings
 
 
 class DbManager(object):
     """ DbManger holds the SQLlite3 instance and custom operations"""
-
-    # Maximum number allowed to follow based on certain Twitter rules
-    MAX_FOLLOW = 40
-
-    # Number of people to unfollow if we reach our maximum number of people to follow
-    NUM_UNFOLLOW = 5
-
-    # Table name which holds the id's
-    TABLE = 'following'
-
-    # Path and Filename of SQLITE3 Database
-    PATH = '/config/'
-    FILENAME = 'Twitterbot'
 
     def __init__(self, following):
         """ Initialize the database
 
         @param following: A list of user id's to clean up our database
         """
+        self.TABLE = settings.TABLE
+        self.PATH = settings.PATH
+        self.FILENAME = settings.FILENAME
+        self.NUM_UNFOLLOW = settings.NUM_UNFOLLOW
+        self.MAX_FOLLOW = settings.MAX_FOLLOW
 
         print("Ensuring Database is setup...")
 
         database = self.PATH + self.FILENAME + '.sqlite3'
-
         conn = sqlite3.connect(database)
         conn.execute(" \
             CREATE TABLE IF NOT EXISTS " + self.TABLE + "( \

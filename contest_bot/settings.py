@@ -1,7 +1,11 @@
 
 # API Key Information
 API = {
-
+    'CONSUMER_KEY': '',
+    'CONSUMER_SECRET': '',
+    'ACCESS_TOKEN': '',
+    'ACCESS_TOKEN_SECRET': '',
+    'TWITTER_HANDLE': ''
 }
 
 SEARCH = {
@@ -16,6 +20,20 @@ CONTEST_RULES = {
     'FAVORITE' : {'Fav', 'favorite', 'FAVORITE', 'Favorite', 'favourite', 'FAVOURITE', 'Favourite'},
     'COMMENT' : {'comment', 'COMMENT', 'Comment'},
 }
+
+# Maximum number allowed to follow based on certain Twitter rules
+MAX_FOLLOW = 40
+
+# Database Information
+# Number of people to unfollow if we reach our maximum number of people to follow
+NUM_UNFOLLOW = 5
+
+# Table name which holds the id's
+TABLE = 'following'
+
+# Path and Filename of SQLITE3 Database
+PATH = '/config/'
+FILENAME = 'Twitterbot'
 
 
 # names in username to ignore

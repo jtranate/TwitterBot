@@ -1,8 +1,6 @@
-import settings, twython
-from db_manager import DbManager
+import twython, os, sys, shutil
 
-IGNORE_USERS = settings.IGNORE_USERS
-global ignore_users
+
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
@@ -86,7 +84,7 @@ def enter_contest(twitter, db, tweets, contest_rules):
 
                 # Delete users before creating the friendship
                 unfollow = db.upsert_user(user_id_str)
-                unfollow_users(unfollow)
+                unfollow_users(twitter, unfollow)
 
                 twitter.create_friendship(screen_name=user_screen_name, follow=True)
                 followed = True
@@ -112,6 +110,19 @@ def unfollow_users(twitter, user_ids):
 
 
 if __name__ == '__main__':
+    # Check to see if settings is in config, if not add it
+    CURR_PATH = os.path.dirname(os.path.abspath(__file__))
+    if not os.path.exists('/config/bot_settings.py'):
+        shutil.move(os.path.join(CURR_PATH, 'settings.py'), '/config/bot_settings.py')
+    sys.path.insert(0, '/config/')
+
+    import bot_settings as settings
+    from db_manager import DbManager
+
+    IGNORE_USERS = settings.IGNORE_USERS
+    global ignore_users
+
+
     twitter = get_twython_instance(settings.API)
     following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
 
