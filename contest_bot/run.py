@@ -79,9 +79,8 @@ def enter_contest(twitter, db, tweets, contest_rules):
             if word in contest_rules['FOLLOW']:
 
                 # Delete users before creating the friendship
-                delete_users = db.upsert_user(user_id_str, user_screen_name, twitter)
-                for user_id in delete_users:
-                    twitter.destroy_friendship(user_id=user_id)
+                unfollow = db.upsert_user(user_id_str, user_screen_name, twitter)
+                unfollow_users(unfollow)
 
                 twitter.create_friendship(screen_name=user_screen_name, follow=True)
                 followed = True
@@ -96,16 +95,26 @@ def enter_contest(twitter, db, tweets, contest_rules):
         print( "\tFavorited: " + str(favorited))
         print( "\tCommented: " + str(commented))
 
+def unfollow_users(twitter, user_ids):
+    """ Unfollow users on twitter
+
+    @param twitter: Twython instance to use
+    @param user_ids: list of user id's to unfollow
+    """
+    for user_id in user_ids:
+        twitter.destroy_friendship(user_id=user_id)
+
+
 if __name__ == '__main__':
     twitter = get_twython_instance(settings.API)
-    # following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
-    following = [2230438434, 588425671, 21672310, 2805827940, 44706253, 561684253, 19725644, 4196983835, 29501253, 20322929, 45709328, 487736815, 568825492, 84279963, 913812620, 500704345, 798234950, 350512140, 266336410, 1016021178, 166747718, 16409683, 268414482, 25073877, 23083404, 158314798, 444160392, 235833507, 2193607094, 17364412, 19394188, 517077573, 289853473, 1901273544, 39538010, 21111883, 1599608046, 2863996955, 1476502188, 105119490, 141944292, 3195874741, 154280902, 46775436, 86980320]
+    following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
 
     # Initialize the Database
     db = DbManager(settings.DB_PATH, following)
+    unfollow_users(twitter, db.delete_user_check())
 
 
-    # for criteria in settings.SEARCH['CRITERIA']:
-        # response = search(twitter, criteria, settings.SEARCH['FILTERS'], 5, 'recent')
+    for criteria in settings.SEARCH['CRITERIA']:
+        response = search(twitter, criteria, settings.SEARCH['FILTERS'], 5, 'popular')
 
-        # enter_contest(twitter, db, response['statuses'], settings.CONTEST_RULES)
+        enter_contest(twitter, db, response['statuses'], settings.CONTEST_RULES)

@@ -7,10 +7,14 @@ class DbManager(object):
     """ DbManger holds the SQLlite3 instance and custom operations"""
 
     # Maximum number allowed to follow based on certain Twitter rules
-    MAX_FOLLOW = 2000
+    MAX_FOLLOW = 40
 
     # Number of people to unfollow if we reach our maximum number of people to follow
     NUM_UNFOLLOW = 5
+
+    # Table name which holds the id's
+    TABLE = 'following'
+
 
     def __init__(self, database, following):
         """ Initialize the database
@@ -23,16 +27,17 @@ class DbManager(object):
         print("Updating Database with current people you are following...")
 
         # Get all Users id's in the database
-        db_ids = self.cursor.execute("SELECT user_id from following").fetchall()
+        db_ids = self.cursor.execute("SELECT user_id FROM " + self.TABLE).fetchall()
         db_ids = {str(i[0]) for i in db_ids}
 
+        # Make following list into set
         following = {str(i) for i in following}
 
         # Delete the id's in the database we no longer are following
         delete_ids = db_ids - following
         conditions = " OR user_id=".join(delete_ids)
         if len(conditions) > 0:
-            self.cursor.execute("DELETE FROM following WHERE user_id=" + conditions)
+            self.cursor.execute("DELETE FROM " + self.TABLE + " WHERE user_id=" + conditions)
 
         # Add the id's we are currently following
         add_ids = following - db_ids
@@ -42,16 +47,16 @@ class DbManager(object):
             conditions += "(%s), " % id
         conditions += "(%s)" % last
         if len(conditions) > 0:
-            self.cursor.execute("INSERT INTO following (user_id) VALUES " + conditions)
+            self.cursor.execute("INSERT INTO " + self.TABLE + " (user_id) VALUES " + conditions)
 
 
-        self.num_following = self.cursor.execute("SELECT COUNT(*) FROM following").fetchone()[0]
-        self.cursor.execute("DELETE FROM following ORDER BY date_added ASC LIMIT " + str(self.NUM_UNFOLLOW))
+        self.num_following = self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]
+
         print("Update Complete.")
         print("You are following %d accounts" % self.num_following)
+    
 
-
-    def upsert_user(user_id):
+    def upsert_user(self, user_id):
         """ Upsert the user into the database
 
         @param user_id: User Id to insert or update the timestamp of
@@ -60,16 +65,23 @@ class DbManager(object):
         delete = []
 
 
-        self.cursor.execute("INSERT OR REPLACE INTO following (user_id) VALUES(" + user_id + ")")
+        self.cursor.execute("INSERT OR REPLACE INTO " + self.TABLE + " (user_id) VALUES(" + user_id + ")")
         self.num_following += 1
 
+        return self.delete_user_check()
+
+    def delete_user_check(self):
+        """ Delete users if we are exceeding the amount of people we can follow
+
+        @return list of user_id's that were deleted
+        """
+        delete = []
         # If we are following more than 2000 people, we want to unfollow some people
-        if self.num_following >= DbManger.MAX_FOLLOW:
-            criteria = " FROM following ORDER BY date_added ASC LIMIT " + str(self.NUM_UNFOLLOW)
+        if self.num_following >= self.MAX_FOLLOW:
+            criteria = " FROM " + self.TABLE + " ORDER BY date_added ASC LIMIT " + str(self.NUM_UNFOLLOW)
             result = self.cursor.execute("SELECT user_id " + criteria)
             self.cursor.execute("DELETE " + criteria)
             delete = [row[0] for row in result]
-            self.num_following -= NUM_UNFOLLOW
-
+            self.num_following -= self.NUM_UNFOLLOW
 
         return delete
