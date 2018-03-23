@@ -6,6 +6,7 @@ global ignore_users
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
+
     print( "Connecting to Twitter API...")
     return twython.Twython(
                     api['CONSUMER_KEY'],
@@ -44,6 +45,11 @@ def search(twitter, criteria, filters, num_posts, res_type):
 
 def enter_contest(twitter, db, tweets, contest_rules):
     """ Enter a contest
+
+    @param twitter: Twython instance to use
+    @param db: DbManager instance
+    @param tweets: Tweets to look through and enter in
+    @param contest_rules: Rules we need to follow in order to enter
     """
     COMMENT_POST = lambda x: "@" + x + " I want to Win!"
 
@@ -116,5 +122,4 @@ if __name__ == '__main__':
 
     for criteria in settings.SEARCH['CRITERIA']:
         response = search(twitter, criteria, settings.SEARCH['FILTERS'], 5, 'popular')
-
         enter_contest(twitter, db, response['statuses'], settings.CONTEST_RULES)
