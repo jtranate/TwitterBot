@@ -116,7 +116,7 @@ if __name__ == '__main__':
     following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
 
     # Initialize the Database
-    db = DbManager(settings.DB_PATH, following)
+    db = DbManager(following)
     unfollow_users(twitter, db.delete_user_check())
 
 

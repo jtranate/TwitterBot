@@ -15,15 +15,33 @@ class DbManager(object):
     # Table name which holds the id's
     TABLE = 'following'
 
+    # Path and Filename of SQLITE3 Database
+    PATH = '/some_path/'
+    FILENAME = 'Twitterbot'
 
-    def __init__(self, database, following):
+    def __init__(self, following):
         """ Initialize the database
 
-        @param database: The path to the database
         @param following: A list of user id's to clean up our database
         """
+
+        print("Ensuring Database is setup...")
+
+        database = self.PATH + self.FILENAME + '.sqlite3'
+        conn = sqlite3.connect(database)
+        conn.execute(" \
+            CREATE TABLE IF NOT EXISTS " + self.TABLE + "( \
+                user_id BIGINT PRIMARY KEY, \
+                date_added DATETIME DEFAULT CURRENT_TIMESTAMP \
+            )"
+        )
+        conn.close()
+
+        print("Database setup Complete")
+
         self.cursor = sqlite3.connect(database)
 
+        print("Following : " + str(self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]) )
         print("Updating Database with current people you are following...")
 
         # Get all Users id's in the database
@@ -54,7 +72,7 @@ class DbManager(object):
 
         print("Update Complete.")
         print("You are following %d accounts" % self.num_following)
-    
+
 
     def upsert_user(self, user_id):
         """ Upsert the user into the database

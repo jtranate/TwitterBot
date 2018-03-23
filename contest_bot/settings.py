@@ -17,8 +17,6 @@ CONTEST_RULES = {
     'COMMENT' : {'comment', 'COMMENT', 'Comment'},
 }
 
-# Database path
-DB_PATH = '../Twitterbot.sqlite3'
 
 # names in username to ignore
 IGNORE_USERS = ['bot', 'lvbroadcasting']
