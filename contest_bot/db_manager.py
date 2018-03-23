@@ -1,8 +1,7 @@
 
-import sqlite3
+import sqlite3, os
 
 
-# TODO: Mount database
 class DbManager(object):
     """ DbManger holds the SQLlite3 instance and custom operations"""
 
@@ -16,7 +15,7 @@ class DbManager(object):
     TABLE = 'following'
 
     # Path and Filename of SQLITE3 Database
-    PATH = '/some_path/'
+    PATH = '/config/'
     FILENAME = 'Twitterbot'
 
     def __init__(self, following):
@@ -28,6 +27,7 @@ class DbManager(object):
         print("Ensuring Database is setup...")
 
         database = self.PATH + self.FILENAME + '.sqlite3'
+
         conn = sqlite3.connect(database)
         conn.execute(" \
             CREATE TABLE IF NOT EXISTS " + self.TABLE + "( \
@@ -59,17 +59,19 @@ class DbManager(object):
 
         # Add the id's we are currently following
         add_ids = following - db_ids
-        conditions = ""
-        last = add_ids.pop()
-        for id in add_ids:
-            conditions += "(%s), " % id
-        conditions += "(%s)" % last
-        if len(conditions) > 0:
-            self.cursor.execute("INSERT INTO " + self.TABLE + " (user_id) VALUES " + conditions)
+        if len(add_ids) > 0:
+            conditions = ""
+            last = add_ids.pop()
+            for id in add_ids:
+                conditions += "(%s), " % id
+            conditions += "(%s)" % last
+            if len(conditions) > 0:
+                self.cursor.execute("INSERT INTO " + self.TABLE + " (user_id) VALUES " + conditions)
 
 
         self.num_following = self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]
 
+        self.commit()
         print("Update Complete.")
         print("You are following %d accounts" % self.num_following)
 
@@ -80,12 +82,11 @@ class DbManager(object):
         @param user_id: User Id to insert or update the timestamp of
         @return list of user_id's to delete
         """
-        delete = []
-
 
         self.cursor.execute("INSERT OR REPLACE INTO " + self.TABLE + " (user_id) VALUES(" + user_id + ")")
         self.num_following += 1
 
+        self.commit()
         return self.delete_user_check()
 
     def delete_user_check(self):
@@ -102,4 +103,9 @@ class DbManager(object):
             delete = [row[0] for row in result]
             self.num_following -= self.NUM_UNFOLLOW
 
+        self.commit()
         return delete
+
+    def commit(self):
+        """ Commit changes """
+        self.cursor.commit()

@@ -85,7 +85,7 @@ def enter_contest(twitter, db, tweets, contest_rules):
             if word in contest_rules['FOLLOW']:
 
                 # Delete users before creating the friendship
-                unfollow = db.upsert_user(user_id_str, user_screen_name, twitter)
+                unfollow = db.upsert_user(user_id_str)
                 unfollow_users(unfollow)
 
                 twitter.create_friendship(screen_name=user_screen_name, follow=True)
