@@ -1,7 +1,6 @@
 FROM python:3
 
-ARG config_path
-ENV config_path ${config_path}
+ENV config_path /config
 ENV app_path /app
 
 COPY contest_bot ${app_path}
