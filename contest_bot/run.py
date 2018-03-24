@@ -1,7 +1,6 @@
 import twython, os, sys, shutil
 
 
-
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
 
@@ -110,11 +109,19 @@ def unfollow_users(twitter, user_ids):
 
 
 if __name__ == '__main__':
-    # Check to see if settings is in config, if not add it
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))
-    if not os.path.exists('/config/bot_settings.py'):
-        shutil.move(os.path.join(CURR_PATH, 'settings.py'), '/config/bot_settings.py')
-    sys.path.insert(0, '/config/')
+
+    # Get path where database and settings are installed
+    if sys.argv[1][-1] != '/':
+        CONFIG_PATH = sys.argv[1] + '/'
+    else:
+        CONFIG_PATH = sys.argv[1]
+
+    # Install settings if not yet installed
+    if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
+        shutil.move(os.path.join(CURR_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
+    sys.path.insert(0, CONFIG_PATH)
+
 
     import bot_settings as settings
     from db_manager import DbManager
@@ -122,14 +129,12 @@ if __name__ == '__main__':
     IGNORE_USERS = settings.IGNORE_USERS
     global ignore_users
 
-
     twitter = get_twython_instance(settings.API)
-    following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
 
     # Initialize the Database
-    db = DbManager(following)
+    following = twitter.get_friends_ids(screen_name = settings.API['TWITTER_HANDLE'])['ids']
+    db = DbManager(following, CONFIG_PATH)
     unfollow_users(twitter, db.delete_user_check())
-
 
     for criteria in settings.SEARCH['CRITERIA']:
         response = search(twitter, criteria, settings.SEARCH['FILTERS'], 5, 'popular')

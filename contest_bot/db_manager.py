@@ -7,20 +7,22 @@ import bot_settings as settings
 class DbManager(object):
     """ DbManger holds the SQLlite3 instance and custom operations"""
 
-    def __init__(self, following):
+    def __init__(self, following, path):
         """ Initialize the database
 
         @param following: A list of user id's to clean up our database
+        @param path: Path where database lies
         """
         self.TABLE = settings.TABLE
-        self.PATH = settings.PATH
+        self.PATH = path
         self.FILENAME = settings.FILENAME
         self.NUM_UNFOLLOW = settings.NUM_UNFOLLOW
         self.MAX_FOLLOW = settings.MAX_FOLLOW
 
         print("Ensuring Database is setup...")
-
         database = self.PATH + self.FILENAME + '.sqlite3'
+
+        print("Connecting to Database: " + database)
         conn = sqlite3.connect(database)
         conn.execute(" \
             CREATE TABLE IF NOT EXISTS " + self.TABLE + "( \
