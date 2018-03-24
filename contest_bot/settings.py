@@ -1,5 +1,4 @@
 
-
 # API Key Information
 API = {
     'CONSUMER_KEY': '',
@@ -39,3 +38,6 @@ FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
 IGNORE_USERS = ['bot', 'lvbroadcasting']
+
+# Minutes to wait before running again
+WAIT_TIME = 1

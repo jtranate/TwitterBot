@@ -21,11 +21,12 @@ def is_bot(username):
 
     return False
 
-def get_contests(twitter, criteria):
+def get_contests(twitter, criteria, last_id):
     """ Search on twitter for RT contests
 
     @param twitter: Twython instance to use
     @param critera: Phrase to search for
+    @param last_id: Latest Id we saw
     @return collection of Tweets
 
     https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
@@ -44,7 +45,11 @@ def get_contests(twitter, criteria):
             res_type)
         )
 
-    return twitter.search(q=criteria + ' ' + filters, count=num_posts, result_type=res_type, lang='en')
+    return twitter.search(q=criteria + ' ' + filters,
+                            count=num_posts,
+                            result_type=res_type,
+                            lang='en',
+                            max_id = last_id)
 
 
 def enter_contest(twitter, db, tweets):
@@ -96,20 +101,24 @@ def enter_contest(twitter, db, tweets):
                 twitter.update_status(status=COMMENT_POST(user_screen_name), in_reply_to_status_id=post_id)
                 commented = True
 
-        logger.info("""
-            \tRetweeted Post:
-                \t\tPost Id: %s
-                \t\tUsername: %s
-                \t\tFollowed: %r
-                \t\tFavorited: %r
-                \t\tCommented: %r
-                \t\tTweet: %s
-        """ % (post_id_str,
-         user_id_str,
-         followed,
-         favorited,
-         commented,
-         data['text'].replace("\n",'')))
+        if retweeted:
+            logger.info("""
+                \tRetweeted Post:
+                    \t\tPost Id: %s
+                    \t\tUsername: %s
+                    \t\tFollowed: %r
+                    \t\tFavorited: %r
+                    \t\tCommented: %r
+                    \t\tTweet: %s
+            """ % (post_id_str,
+             user_id_str,
+             followed,
+             favorited,
+             commented,
+             data['text'].replace("\n",'')))
+            return post_id
+        return 0
+
 
 
 def unfollow_users(twitter, user_ids):
@@ -157,7 +166,10 @@ if __name__ == '__main__':
     db = DbManager(following, CONFIG_PATH)
     unfollow_users(twitter, db.delete_user_check())
 
-    
-    for criteria in settings.SEARCH['CRITERIA']:
-        response = get_contests(twitter, criteria)
-        enter_contest(twitter, db, response['statuses'])
+    last_id = 1
+    while(1):
+        for criteria in settings.SEARCH['CRITERIA']:
+            response = get_contests(twitter, criteria, last_id)
+            post_id = enter_contest(twitter, db, response['statuses'])
+            last_id = max(last_id, post_id)
+        time.sleep(settings.WAIT_TIME * 60)
