@@ -1,6 +1,4 @@
-
-import sqlite3
-
+import sqlite3, logger
 import bot_settings as settings
 
 
@@ -19,10 +17,10 @@ class DbManager(object):
         self.NUM_UNFOLLOW = settings.NUM_UNFOLLOW
         self.MAX_FOLLOW = settings.MAX_FOLLOW
 
-        print("Ensuring Database is setup...")
+        logger.info("Ensuring Database is setup...")
         database = self.PATH + self.FILENAME + '.sqlite3'
 
-        print("Connecting to Database: " + database)
+        logger.info("Connecting to Database: " + database)
         conn = sqlite3.connect(database)
         conn.execute(" \
             CREATE TABLE IF NOT EXISTS " + self.TABLE + "( \
@@ -32,12 +30,12 @@ class DbManager(object):
         )
         conn.close()
 
-        print("Database setup Complete")
+        logger.info("Database setup Complete")
 
         self.cursor = sqlite3.connect(database)
 
-        print("Following : " + str(self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]) )
-        print("Updating Database with current people you are following...")
+        logger.info("Following : " + str(self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]) )
+        logger.info("Updating Database with current people you are following...")
 
         # Get all Users id's in the database
         db_ids = self.cursor.execute("SELECT user_id FROM " + self.TABLE).fetchall()
@@ -67,8 +65,7 @@ class DbManager(object):
         self.num_following = self.cursor.execute("SELECT COUNT(*) FROM " + self.TABLE).fetchone()[0]
 
         self.commit()
-        print("Update Complete.")
-        print("You are following %d accounts" % self.num_following)
+        logger.info("Update Complete. You are following %d accounts" % self.num_following)
 
 
     def upsert_user(self, user_id):
@@ -104,3 +101,4 @@ class DbManager(object):
     def commit(self):
         """ Commit changes """
         self.cursor.commit()
+        logger.info("Committing changes to database")

@@ -11,7 +11,9 @@ API = {
 
 SEARCH = {
     'CRITERIA' : ['retweet to win', 'rt to win'],
-    'FILTERS': '-filter:retweets AND -filter:replies'
+    'FILTERS': '-filter:retweets AND -filter:replies',
+    'RESULT_TYPE': 'recent', #['popular', 'recent', 'mixed']
+    'NUM_POSTS': 20
 }
 
 # RULES to see if we need to Follow, Favorite, or Comment a post to win

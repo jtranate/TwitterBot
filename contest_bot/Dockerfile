@@ -6,6 +6,7 @@ ENV config_path ${config_path}
 ADD run.py /
 ADD settings.py /
 ADD db_manager.py /
+ADD logger.py /
 ADD requirements.txt /
 
 RUN pip install -r requirements.txt

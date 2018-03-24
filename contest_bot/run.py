@@ -1,10 +1,10 @@
-import twython, os, sys, shutil
+import twython, os, sys, shutil, time
 
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
 
-    print( "Connecting to Twitter API...")
+    logger.info( "Connecting to Twitter API...")
     return twython.Twython(
                     api['CONSUMER_KEY'],
                     api['CONSUMER_SECRET'],
@@ -15,40 +15,46 @@ def get_twython_instance(api):
 def is_bot(username):
     """ Determine if the post was made by a bot """
     username = username.replace("0", 'o').lower()
-    for user in IGNORE_USERS:
+    for user in settings.IGNORE_USERS:
         if user in username:
             return True
 
     return False
 
-def search(twitter, criteria, filters, num_posts, res_type):
+def get_contests(twitter, criteria):
     """ Search on twitter for RT contests
 
     @param twitter: Twython instance to use
     @param critera: Phrase to search for
-    @param filters: Filters to use during search
-    @param num_posts: Number of posts to return
-    @param res_type: Result type ['mixed', 'popular', 'recent']
     @return collection of Tweets
 
     https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
     """
-    print( "Searching for '" + criteria + "'")
-    print( "\tFilters: " + filters)
-    print( "\tNumber of posts: " + str(num_posts))
-    print( "\tResult Type: " + res_type)
-    return twitter.search(q=criteria + ' ' + filters, count=num_posts, result_type=res_type, lang='en') #change to recent
+    filters = settings.SEARCH['FILTERS']
+    num_posts = settings.SEARCH['NUM_POSTS']
+    res_type = settings.SEARCH['RESULT_TYPE']
+    logger.info("""
+        \tSearching for '%s'
+            \t\tFilters: %s
+            \t\tNumber of posts: %d
+            \t\tResult Type: %s
+    """ % (criteria,
+            filters,
+            num_posts,
+            res_type)
+        )
+
+    return twitter.search(q=criteria + ' ' + filters, count=num_posts, result_type=res_type, lang='en')
 
 
-def enter_contest(twitter, db, tweets, contest_rules):
+def enter_contest(twitter, db, tweets):
     """ Enter a contest
 
     @param twitter: Twython instance to use
     @param db: DbManager instance
     @param tweets: Tweets to look through and enter in
-    @param contest_rules: Rules we need to follow in order to enter
     """
-    COMMENT_POST = lambda x: "@" + x + " I want to Win!"
+    COMMENT_POST = lambda x: "@" + x + " I want to Win!. Pick me @" + settings.API['TWITTER_HANDLE']
 
     for data in tweets:
         post_id_str = data['id_str']
@@ -58,16 +64,12 @@ def enter_contest(twitter, db, tweets, contest_rules):
         if is_bot(user_screen_name):
             continue
 
+        retweeted = False
         try:
-            retweeted = False
-            for word in contest_rules['RETWEET']:
+            for word in settings.CONTEST_RULES['RETWEET']:
                 if word in data['text'].replace('#', '').split(' '):
                     # Retweet to enter
                     twitter.retweet(id=post_id_str)
-                    print( "Retweeted post ")
-                    print( "\tPost ID: " + post_id_str)
-                    print( "\tUsername: " + user_id_str)
-                    print( "\tTweet: " + data['text'].replace("\n", ''))
                     retweeted = True
                     break
 
@@ -79,7 +81,7 @@ def enter_contest(twitter, db, tweets, contest_rules):
 
         followed = favorited = commented = False
         for word in data['text'].split(' '):
-            if word in contest_rules['FOLLOW']:
+            if word in settings.CONTEST_RULES['FOLLOW']:
 
                 # Delete users before creating the friendship
                 unfollow = db.upsert_user(user_id_str)
@@ -87,16 +89,28 @@ def enter_contest(twitter, db, tweets, contest_rules):
 
                 twitter.create_friendship(screen_name=user_screen_name, follow=True)
                 followed = True
-            if word in contest_rules['FAVORITE']:
+            if word in settings.CONTEST_RULES['FAVORITE']:
                 twitter.create_favorite(id=post_id_str)
                 favorited = True
-            if word in contest_rules['COMMENT']:
+            if word in settings.CONTEST_RULES['COMMENT']:
                 twitter.update_status(status=COMMENT_POST(user_screen_name), in_reply_to_status_id=post_id)
                 commented = True
 
-        print( "\tFollowed: " + str(followed))
-        print( "\tFavorited: " + str(favorited))
-        print( "\tCommented: " + str(commented))
+        logger.info("""
+            \tRetweeted Post:
+                \t\tPost Id: %s
+                \t\tUsername: %s
+                \t\tFollowed: %r
+                \t\tFavorited: %r
+                \t\tCommented: %r
+                \t\tTweet: %s
+        """ % (post_id_str,
+         user_id_str,
+         followed,
+         favorited,
+         commented,
+         data['text'].replace("\n",'')))
+
 
 def unfollow_users(twitter, user_ids):
     """ Unfollow users on twitter
@@ -109,6 +123,7 @@ def unfollow_users(twitter, user_ids):
 
 
 if __name__ == '__main__':
+
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 
     # Get path where database and settings are installed
@@ -116,6 +131,14 @@ if __name__ == '__main__':
         CONFIG_PATH = sys.argv[1] + '/'
     else:
         CONFIG_PATH = sys.argv[1]
+
+    # Set up logger
+    LOG_PATH = os.path.join(CONFIG_PATH, 'logs/')
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+    import logger
+    logger.setup(LOG_PATH)
+
 
     # Install settings if not yet installed
     if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
@@ -126,9 +149,7 @@ if __name__ == '__main__':
     import bot_settings as settings
     from db_manager import DbManager
 
-    IGNORE_USERS = settings.IGNORE_USERS
-    global ignore_users
-
+    # Create twitter instance
     twitter = get_twython_instance(settings.API)
 
     # Initialize the Database
@@ -136,6 +157,7 @@ if __name__ == '__main__':
     db = DbManager(following, CONFIG_PATH)
     unfollow_users(twitter, db.delete_user_check())
 
+    
     for criteria in settings.SEARCH['CRITERIA']:
-        response = search(twitter, criteria, settings.SEARCH['FILTERS'], 5, 'popular')
-        enter_contest(twitter, db, response['statuses'], settings.CONTEST_RULES)
+        response = get_contests(twitter, criteria)
+        enter_contest(twitter, db, response['statuses'])
