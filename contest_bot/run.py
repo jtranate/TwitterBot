@@ -1,5 +1,4 @@
-import twython, os, sys, shutil, time
-
+import twython, os, sys, shutil, time, json, re, random, requests
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
@@ -147,6 +146,9 @@ def enter_contests(twitter, db, tweets):
              favorited,
              commented,
              data['text'].replace("\n",'')))
+            if bool(random.getrandbits(1)):
+                post_random(twitter)
+                logger.info("Posting random tweet")
     return last_id
 
 
@@ -166,6 +168,17 @@ def construct_path(path):
         path += '/'
     return path
 
+
+def post_random(twitter):
+    """ Post a random text to your account """
+    clean_html = lambda txt: re.sub(re.compile('<.*?>'), '', txt)
+
+    response = requests.get(url=settings.QUOTE_API)
+    data = response.json()[0]
+    author = data['title']
+    text = data['content'][:280-len(author)-5]
+    twitter_post = clean_html(text) + " - " + author
+    twitter.update_status(status=twitter_post)
 
 if __name__ == '__main__':
 
@@ -200,8 +213,11 @@ if __name__ == '__main__':
 
     last_id = 1
     while(1):
+        logger.info("Searching...")
         for criteria in settings.SEARCH['CRITERIA']:
             response = get_contests(twitter, criteria, last_id)
             post_id = enter_contests(twitter, db, response['statuses'])
             last_id = max(last_id, post_id)
+        logger.info("Searching Complete...")
+        logger.info("Waiting for next interation...")
         time.sleep(settings.WAIT_TIME * 60)
