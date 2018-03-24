@@ -12,12 +12,14 @@ SEARCH = {
     'CRITERIA' : ['retweet to win', 'rt to win'],
     'FILTERS': '-filter:retweets AND -filter:replies',
     'RESULT_TYPE': 'recent', #['popular', 'recent', 'mixed']
-    'NUM_POSTS': 20
+    'NUM_POSTS': 40
 }
 
 # RULES to see if we need to Follow, Favorite, or Comment a post to win
 CONTEST_RULES = {
     'RETWEET': {"Retweet", "RT", "rt", 'Rt', 'retweet', 'RETWEET'},
+    'RULES': ['to enter', 'to win'], # Words that must show if we want to enter (helps filter out)
+    'BOT': ['enter', 'win', 'sweepstakes'],
     'FOLLOW' : {'follow', 'Follow', 'FOLLOW'},
     'FAVORITE' : {'Fav', 'favorite', 'FAVORITE', 'Favorite', 'favourite', 'FAVOURITE', 'Favourite'},
     'COMMENT' : {'comment', 'COMMENT', 'Comment'},
@@ -37,7 +39,7 @@ TABLE = 'following'
 FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
-IGNORE_USERS = ['bot', 'lvbroadcasting']
+IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3']
 
 # Minutes to wait before running again
 WAIT_TIME = 1

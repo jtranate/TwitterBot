@@ -14,6 +14,9 @@ def get_twython_instance(api):
 
 def is_bot(username):
     """ Determine if the post was made by a bot """
+    if username in settings.IGNORE_USERS:
+        return True
+
     username = username.replace("0", 'o').lower()
     for user in settings.IGNORE_USERS:
         if user in username:
@@ -52,30 +55,58 @@ def get_contests(twitter, criteria, last_id):
                             max_id = last_id)
 
 
-def enter_contest(twitter, db, tweets):
-    """ Enter a contest
+def enter_contests(twitter, db, tweets):
+    """ Enter contests contest
 
     @param twitter: Twython instance to use
     @param db: DbManager instance
     @param tweets: Tweets to look through and enter in
     """
     COMMENT_POST = lambda x: "@" + x + " I want to Win!. Pick me @" + settings.API['TWITTER_HANDLE']
-
+    last_id = 1
     for data in tweets:
         post_id_str = data['id_str']
         post_id = data['id']
         user_id_str = data['user']['id_str']
         user_screen_name = data['user']['screen_name']
+        text = data['text'].lower()
         if is_bot(user_screen_name):
             continue
 
         retweeted = False
         try:
             for word in settings.CONTEST_RULES['RETWEET']:
-                if word in data['text'].replace('#', '').split(' '):
-                    # Retweet to enter
+                if word in text.replace('#', '').split(' '):
+                    valid = False
+                    for rule in settings.CONTEST_RULES['RULES']:
+                        if rule in text:
+                            valid = True
+                    if not valid: break
+
+                    # Make sure user is not a bot...
+                    timeline = twitter.get_user_timeline(user_id=user_id_str, count=5, exclude_replies="True")
+                    bot_checker = 0
+                    for post in timeline:
+                        bot_text = post['text'].lower().replace('#','')
+                        bot_hit = False
+                        for txt in settings.CONTEST_RULES['RETWEET']:
+                            if txt in bot_text:
+                                bot_hit = True
+                                break
+                        if not txt:
+                            for txt in settings.CONTEST_RULES['BOT']:
+                                if txt in bot_text:
+                                    bot_hit = True
+                                    break
+                        if bot_hit:
+                            bot_checker += 1
+                    if bot_checker >= 4:
+                        break;
+
+                    # Not a bot, now we can retweet
                     twitter.retweet(id=post_id_str)
                     retweeted = True
+                    last_id = max(last_id, post_id)
                     break
 
             if not retweeted:
@@ -85,7 +116,7 @@ def enter_contest(twitter, db, tweets):
             continue
 
         followed = favorited = commented = False
-        for word in data['text'].split(' '):
+        for word in text.split(' '):
             if word in settings.CONTEST_RULES['FOLLOW']:
 
                 # Delete users before creating the friendship
@@ -116,8 +147,7 @@ def enter_contest(twitter, db, tweets):
              favorited,
              commented,
              data['text'].replace("\n",'')))
-            return post_id
-        return 0
+    return last_id
 
 
 
@@ -132,7 +162,6 @@ def unfollow_users(twitter, user_ids):
 
 
 if __name__ == '__main__':
-
     CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 
     # Get path where database and settings are installed
@@ -170,6 +199,6 @@ if __name__ == '__main__':
     while(1):
         for criteria in settings.SEARCH['CRITERIA']:
             response = get_contests(twitter, criteria, last_id)
-            post_id = enter_contest(twitter, db, response['statuses'])
+            post_id = enter_contests(twitter, db, response['statuses'])
             last_id = max(last_id, post_id)
         time.sleep(settings.WAIT_TIME * 60)
