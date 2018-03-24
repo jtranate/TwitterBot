@@ -40,7 +40,7 @@ TABLE = 'following'
 FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
-IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3']
+IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3', 'solodmhub']
 
 # Minutes to wait before running again
 WAIT_TIME = 1

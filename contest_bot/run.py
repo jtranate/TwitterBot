@@ -64,6 +64,9 @@ def enter_contests(twitter, db, tweets):
     COMMENT_POST = lambda x: "@" + x + " I want to Win!. Pick me @" + settings.API['TWITTER_HANDLE']
     last_id = 1
     for data in tweets:
+        if bool(random.getrandbits(1)):
+            post_random(twitter)
+            logger.info("Posting random tweet")
         post_id_str = data['id_str']
         post_id = data['id']
         user_id_str = data['user']['id_str']
@@ -146,9 +149,6 @@ def enter_contests(twitter, db, tweets):
              favorited,
              commented,
              data['text'].replace("\n",'')))
-            if bool(random.getrandbits(1)):
-                post_random(twitter)
-                logger.info("Posting random tweet")
     return last_id
 
 
