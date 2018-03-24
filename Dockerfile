@@ -1,13 +1,13 @@
 FROM python:3
 
-ENV config_path /config
-ENV app_path /app
+ENV CONFIG_PATH /config
+ENV APP_PATH /app
 
-COPY contest_bot ${app_path}
+COPY contest_bot ${APP_PATH}
 
-RUN pip install -r ${app_path}/requirements.txt
-#RUN apt-get update
-#RUN apt-get -y upgrade
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN pip install -r ${APP_PATH}/requirements.txt
 
-VOLUME /config_path
-CMD python3 /${app_path}/run.py ${config_path}
+VOLUME ${CONFIG_PATH}
+CMD python3 /${APP_PATH}/run.py ${CONFIG_PATH} ${APP_PATH}

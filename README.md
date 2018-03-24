@@ -8,6 +8,6 @@ Alter the [settings.py](https://github.com/tranaj2/TwitterBot/blob/master/contes
 
 ### Running the Docker Container
 ```
-sudo docker build --build_arg config_path="<path_to_config>" -t "twitter_bot" .  
-sudo docker run --name=<name> -d -v <path_to_data>:<path_to_config> twitter_bot
+sudo docker build -t "twitter_bot" .
+sudo docker run --name=<name> -d -v <path_to_data>:/config twitter_bot
 ```

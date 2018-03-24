@@ -160,15 +160,18 @@ def unfollow_users(twitter, user_ids):
     for user_id in user_ids:
         twitter.destroy_friendship(user_id=user_id)
 
+def construct_path(path):
+    """ Correctly configure a path """
+    if path[-1] != '/':
+        path += '/'
+    return path
+
 
 if __name__ == '__main__':
-    CURR_PATH = os.path.dirname(os.path.abspath(__file__))
 
     # Get path where database and settings are installed
-    if sys.argv[1][-1] != '/':
-        CONFIG_PATH = sys.argv[1] + '/'
-    else:
-        CONFIG_PATH = sys.argv[1]
+    CONFIG_PATH = construct_path(sys.argv[1])
+    APP_PATH = construct_path(sys.argv[2])
 
     # Set up logger
     LOG_PATH = os.path.join(CONFIG_PATH, 'logs/')
@@ -180,7 +183,7 @@ if __name__ == '__main__':
 
     # Install settings if not yet installed
     if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
-        shutil.move(os.path.join(CURR_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
+        shutil.move(os.path.join(APP_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
     sys.path.insert(0, CONFIG_PATH)
 
 
