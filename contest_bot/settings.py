@@ -9,11 +9,12 @@ API = {
 }
 
 
+
 SEARCH = {
     'CRITERIA' : ['retweet to win', 'rt to win'],
     'FILTERS': '-filter:retweets AND -filter:replies',
     'RESULT_TYPE': 'recent', #['popular', 'recent', 'mixed']
-    'NUM_POSTS': 40
+    'NUM_POSTS': 40 # Number of posts to get when searching
 }
 
 # RULES to see if we need to Follow, Favorite, or Comment a post to win
@@ -46,3 +47,6 @@ WAIT_TIME = 1
 
 # Random Quote API to post randomly
 QUOTE_API = 'http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1'
+
+# Log to Console; If False, will log to a file instead
+LOG_TO_CONSOLE = True

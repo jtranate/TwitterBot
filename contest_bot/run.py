@@ -1,4 +1,4 @@
-import twython, os, sys, shutil, time, json, re, random, requests
+import twython, os, sys, shutil, time, json, re, random, requests, html
 
 def get_twython_instance(api):
     """ Initialize an instance of Twython with variables needed """
@@ -62,11 +62,9 @@ def enter_contests(twitter, db, tweets):
     @param tweets: Tweets to look through and enter in
     """
     COMMENT_POST = lambda x: "@" + x + " I want to Win!. Pick me @" + settings.API['TWITTER_HANDLE']
+
     last_id = 1
     for data in tweets:
-        if bool(random.getrandbits(1)):
-            post_random(twitter)
-            logger.info("Posting random tweet")
         post_id_str = data['id_str']
         post_id = data['id']
         user_id_str = data['user']['id_str']
@@ -135,6 +133,10 @@ def enter_contests(twitter, db, tweets):
                 commented = True
 
         if retweeted:
+            if bool(random.getrandbits(1)):
+                if post_random(twitter):
+                    logger.info("Posting random tweet")
+
             logger.info("""
                 \tRetweeted Post:
                     \t\tPost Id: %s
@@ -149,6 +151,9 @@ def enter_contests(twitter, db, tweets):
              favorited,
              commented,
              data['text'].replace("\n",'')))
+
+
+
     return last_id
 
 
@@ -176,9 +181,14 @@ def post_random(twitter):
     response = requests.get(url=settings.QUOTE_API)
     data = response.json()[0]
     author = data['title']
-    text = data['content'][:280-len(author)-5]
+    text = html.unescape( data['content'][:280-len(author)-5] )
     twitter_post = clean_html(text) + " - " + author
-    twitter.update_status(status=twitter_post)
+    try:
+        twitter.update_status(status=twitter_post)
+    except:
+        # Can't have duplicate statuses, so just skip it
+        return False
+    return True
 
 if __name__ == '__main__':
 
@@ -186,18 +196,18 @@ if __name__ == '__main__':
     CONFIG_PATH = construct_path(sys.argv[1])
     APP_PATH = construct_path(sys.argv[2])
 
+    # Install settings if not yet installed
+    if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
+        shutil.move(os.path.join(APP_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
+    sys.path.insert(0, CONFIG_PATH)
+
+
     # Set up logger
     LOG_PATH = os.path.join(CONFIG_PATH, 'logs/')
     if not os.path.exists(LOG_PATH):
         os.makedirs(LOG_PATH)
     import logger
     logger.setup(LOG_PATH)
-
-
-    # Install settings if not yet installed
-    if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
-        shutil.move(os.path.join(APP_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
-    sys.path.insert(0, CONFIG_PATH)
 
 
     import bot_settings as settings

@@ -1,7 +1,12 @@
 import logging, time
+import bot_settings as settings
 
 
 def setup(logger_path):
+    """ Set up the Logger """
+    if settings.LOG_TO_CONSOLE:
+        return
+
     # Set up Logger
     curr_time = time.strftime("%Y%m%d-%H%M%S")
 
@@ -11,4 +16,8 @@ def setup(logger_path):
 
 
 def info(message):
-    logging.info(message)
+    """ Log the message """
+    if settings.LOG_TO_CONSOLE:
+        print(message)
+    else:
+        logging.info(message)

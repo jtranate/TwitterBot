@@ -10,4 +10,4 @@ RUN apt-get -y upgrade
 RUN pip install -r ${APP_PATH}/requirements.txt
 
 VOLUME ${CONFIG_PATH}
-CMD python3 /${APP_PATH}/run.py ${CONFIG_PATH} ${APP_PATH}
+CMD python3 -u /${APP_PATH}/run.py ${CONFIG_PATH} ${APP_PATH}
