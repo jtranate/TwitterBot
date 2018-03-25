@@ -29,14 +29,13 @@ CONTEST_RULES = {
 # Maximum number allowed to follow based on certain Twitter rules
 MAX_FOLLOW = 2000
 
-# Database Information
 # Number of people to unfollow if we reach our maximum number of people to follow
 NUM_UNFOLLOW = 10
 
 # Table name which holds the id's
 TABLE = 'following'
 
-# Path Filename of SQLITE3 Database
+# Filename of SQLITE3 Database
 FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
