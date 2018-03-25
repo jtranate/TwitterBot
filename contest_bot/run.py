@@ -23,19 +23,19 @@ def is_bot(username):
 
     return False
 
-def get_contests(twitter, criteria, last_id):
+def get_contests(twitter, criteria, last_id, res_type):
     """ Search on twitter for RT contests
 
     @param twitter: Twython instance to use
     @param critera: Phrase to search for
     @param last_id: Latest Id we saw
+    @param res_type: Type of result we would like to see
     @return collection of Tweets
 
     https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets
     """
     filters = settings.SEARCH['FILTERS']
     num_posts = settings.SEARCH['NUM_POSTS']
-    res_type = settings.SEARCH['RESULT_TYPE']
     logger.info("""
         \tSearching for '%s'
             \t\tFilters: %s
@@ -225,9 +225,10 @@ if __name__ == '__main__':
     while(1):
         logger.info("Searching...")
         for criteria in settings.SEARCH['CRITERIA']:
-            response = get_contests(twitter, criteria, last_id)
-            post_id = enter_contests(twitter, db, response['statuses'])
-            last_id = max(last_id, post_id)
+            for res_type in settings.SEARECH['RESULT_TYPE']:
+                response = get_contests(twitter, criteria, last_id, res_type)
+                post_id = enter_contests(twitter, db, response['statuses'])
+                last_id = max(last_id, post_id)
         logger.info("Searching Complete...")
         logger.info("Waiting for next interation...")
         time.sleep(settings.WAIT_TIME * 60)

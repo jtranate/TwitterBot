@@ -13,8 +13,8 @@ API = {
 SEARCH = {
     'CRITERIA' : ['retweet to win', 'rt to win'],
     'FILTERS': '-filter:retweets AND -filter:replies',
-    'RESULT_TYPE': 'recent', #['popular', 'recent', 'mixed']
-    'NUM_POSTS': 40 # Number of posts to get when searching
+    'RESULT_TYPE': ['recent', 'popular'], #['popular', 'recent', 'mixed']
+    'NUM_POSTS': 70 # Number of posts to get when searching
 }
 
 # RULES to see if we need to Follow, Favorite, or Comment a post to win
@@ -40,10 +40,10 @@ TABLE = 'following'
 FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
-IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3', 'solodmhub']
+IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3', 'solodmhub', 'jerice50', 'feryooit']
 
 # Minutes to wait before running again
-WAIT_TIME = 1
+WAIT_TIME = 30
 
 # Random Quote API to post randomly
 QUOTE_API = 'http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1'
