@@ -100,7 +100,7 @@ def enter_contests(twitter, db, tweets):
                                     break
                         if bot_hit:
                             bot_checker += 1
-                    if bot_checker >= 4:
+                    if bot_checker >= 3:
                         break;
 
                     # Not a bot, now we can retweet
@@ -181,8 +181,9 @@ def post_random(twitter):
     response = requests.get(url=settings.QUOTE_API)
     data = response.json()[0]
     author = data['title']
-    text = html.unescape( data['content'][:280-len(author)-5] )
+    text = data['content'][:280-len(author)-5]
     twitter_post = clean_html(text) + " - " + author
+    twitter_post = html.unescape(twitter_post)
     try:
         twitter.update_status(status=twitter_post)
     except:

@@ -19,12 +19,12 @@ SEARCH = {
 
 # RULES to see if we need to Follow, Favorite, or Comment a post to win
 CONTEST_RULES = {
-    'RETWEET': {"Retweet", "RT", "rt", 'Rt', 'retweet', 'RETWEET'},
+    'RETWEET': {"retweet", "rt"},
     'RULES': ['to enter', 'to win'], # Words that must show if we want to enter (helps filter out)
     'BOT': ['enter', 'win', 'sweepstakes'],
-    'FOLLOW' : {'follow', 'Follow', 'FOLLOW'},
-    'FAVORITE' : {'Fav', 'favorite', 'FAVORITE', 'Favorite', 'favourite', 'FAVOURITE', 'Favourite'},
-    'COMMENT' : {'comment', 'COMMENT', 'Comment'},
+    'FOLLOW' : {'follow'},
+    'FAVORITE' : {'fav', 'favorite', 'favourite'},
+    'COMMENT' : {'comment'},
 }
 
 # Maximum number allowed to follow based on certain Twitter rules
@@ -40,7 +40,7 @@ TABLE = 'following'
 FILENAME = 'TwitterbotDB'
 
 # names in username to ignore
-IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3', 'solodmhub', 'jerice50', 'feryooit']
+IGNORE_USERS = ['bot', 'lvbroadcasting', 'ilove70315673', 'retweeejt', 'a_yush3', 'solodmhub', 'jerice50', 'feryooit', 'kogilligan']
 
 # Minutes to wait before running again
 WAIT_TIME = 30
