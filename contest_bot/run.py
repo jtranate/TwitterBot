@@ -226,7 +226,7 @@ if __name__ == '__main__':
     while(1):
         logger.info("Searching...")
         for criteria in settings.SEARCH['CRITERIA']:
-            for res_type in settings.SEARECH['RESULT_TYPE']:
+            for res_type in settings.SEARCH['RESULT_TYPE']:
                 response = get_contests(twitter, criteria, last_id, res_type)
                 post_id = enter_contests(twitter, db, response['statuses'])
                 last_id = max(last_id, post_id)
