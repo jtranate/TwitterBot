@@ -23,7 +23,7 @@ CONTEST_RULES = {
     'RULES': ['to enter', 'to win'], # Words that must show if we want to enter (helps filter out)
     'BOT': ['enter', 'win', 'sweepstakes'],
     'FOLLOW' : {'follow'},
-    'FAVORITE' : {'fav', 'favorite', 'favourite'},
+    'FAVORITE' : {'fav', 'favorite', 'favourite', 'like'},
     'COMMENT' : {'comment'},
 }
 
