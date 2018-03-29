@@ -126,12 +126,18 @@ def enter_contests(twitter, db, tweets):
                 twitter.create_friendship(screen_name=user_screen_name, follow=True)
                 followed = True
             if word in settings.CONTEST_RULES['FAVORITE']:
-                twitter.create_favorite(id=post_id_str)
-                favorited = True
+                try:
+                    twitter.create_favorite(id=post_id_str)
+                    favorited = True
+                except:
+                    pass
             if word in settings.CONTEST_RULES['COMMENT']:
-                twitter.update_status(status=COMMENT_POST(user_screen_name), in_reply_to_status_id=post_id)
-                commented = True
-
+                try:
+                    twitter.update_status(status=COMMENT_POST(user_screen_name), in_reply_to_status_id=post_id)
+                    commented = True
+                except:
+                    pass
+                
         if retweeted:
             if bool(random.getrandbits(1)):
                 if post_random(twitter):
