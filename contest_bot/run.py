@@ -23,12 +23,11 @@ def is_bot(username):
 
     return False
 
-def get_contests(twitter, criteria, last_id, res_type):
+def get_contests(twitter, criteria, res_type):
     """ Search on twitter for RT contests
 
     @param twitter: Twython instance to use
     @param critera: Phrase to search for
-    @param last_id: Latest Id we saw
     @param res_type: Type of result we would like to see
     @return collection of Tweets
 
@@ -50,8 +49,7 @@ def get_contests(twitter, criteria, last_id, res_type):
     return twitter.search(q=criteria + ' ' + filters,
                             count=num_posts,
                             result_type=res_type,
-                            lang='en',
-                            max_id = last_id)
+                            lang='en')
 
 
 def enter_contests(twitter, db, tweets):
@@ -63,7 +61,6 @@ def enter_contests(twitter, db, tweets):
     """
     COMMENT_POST = lambda x: "@" + x + " I want to Win!. Pick me @" + settings.API['TWITTER_HANDLE']
 
-    last_id = 1
     for data in tweets:
         post_id_str = data['id_str']
         post_id = data['id']
@@ -106,7 +103,6 @@ def enter_contests(twitter, db, tweets):
                     # Not a bot, now we can retweet
                     twitter.retweet(id=post_id_str)
                     retweeted = True
-                    last_id = max(last_id, post_id)
                     break
 
             if not retweeted:
@@ -157,10 +153,6 @@ def enter_contests(twitter, db, tweets):
              favorited,
              commented,
              data['text'].replace("\n",'')))
-
-
-
-    return last_id
 
 
 
@@ -228,14 +220,12 @@ if __name__ == '__main__':
     db = DbManager(following, CONFIG_PATH)
     unfollow_users(twitter, db.delete_user_check())
 
-    last_id = 1
     while(1):
         logger.info("Searching...")
         for criteria in settings.SEARCH['CRITERIA']:
             for res_type in settings.SEARCH['RESULT_TYPE']:
-                response = get_contests(twitter, criteria, last_id, res_type)
-                post_id = enter_contests(twitter, db, response['statuses'])
-                last_id = max(last_id, post_id)
+                response = get_contests(twitter, criteria, res_type)
+                enter_contests(twitter, db, response['statuses'])
         logger.info("Searching Complete...")
         logger.info("Waiting for next interation...")
         time.sleep(settings.WAIT_TIME * 60)
