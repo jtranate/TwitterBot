@@ -8,6 +8,20 @@ API = {
     'TWITTER_HANDLE': ''
 }
 
+# Emailer Information
+EMAIL = {
+    'ENABLED': False,
+    'SMTP_HOST': '',
+    'FROM_ADDR': '',
+    'USERNAME': '',
+    'FROM_NAME': '',
+    'PASSWORD': '',
+    'PORT': 0,
+    'USE_TLS': False,
+    'USE_SSL': False,
+    'TO': []
+}
+
 
 
 SEARCH = {

@@ -133,7 +133,7 @@ def enter_contests(twitter, db, tweets):
                     commented = True
                 except:
                     pass
-                
+
         if retweeted:
             if bool(random.getrandbits(1)):
                 if post_random(twitter):
@@ -191,6 +191,9 @@ def post_random(twitter):
 
 if __name__ == '__main__':
 
+    if len(sys.argv) != 3:
+        print('Usage: python run.py [CONFIG_PATH] [APP_PATH]')
+        exit(1)
     # Get path where database and settings are installed
     CONFIG_PATH = construct_path(sys.argv[1])
     APP_PATH = construct_path(sys.argv[2])
@@ -198,6 +201,8 @@ if __name__ == '__main__':
     # Install settings if not yet installed
     if not os.path.exists(CONFIG_PATH + 'bot_settings.py'):
         shutil.move(os.path.join(APP_PATH, 'settings.py'), CONFIG_PATH + 'bot_settings.py')
+        print('Edit ' + CONFIG_PATH + 'bot_settings.py with you settings.')
+        exit(1)
     sys.path.insert(0, CONFIG_PATH)
 
 
@@ -208,7 +213,7 @@ if __name__ == '__main__':
     import logger
     logger.setup(LOG_PATH)
 
-
+    # local imports
     import bot_settings as settings
     from db_manager import DbManager
 
